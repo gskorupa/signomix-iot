@@ -1,7 +1,7 @@
-# Cricket bootstrap
+# Signomix IoT
 
-This is a template of a microservice project based on the Cricket Microservices Framework version 2. 
-To start building a new microservice clone the repository as a new one and follow the instructions below.
+The Signomix IoT microservice is part of the Signomix IoT Platform. 
+The microservice provides an API related to the management of IoT devices and their data.
 
 > This is work in progress. Stay tuned. 
 
@@ -12,42 +12,17 @@ To start building a new microservice clone the repository as a new one and follo
 
 ## Quick start
 
-### Building
+### Building package
 
 ```
-$ git clone https://github.com/gskorupa/cricket-bootstrap.git myproject
+$ git clone https://github.com/gskorupa/signomix-iot.git myproject
 $ cd myproject
 $ mvn package
 ```
 
-### Running
+### Docker image
 
 ```
-$ java -jar target/service.jar -r
+docker build -t REPOSITORY_NAME/signomix-iot:TAG .
+docker push REPOSITORY_NAME/signomix-iot:TAG
 ```
-
-
-OpenAPI specification of the running service can be accessed at the service path `/api`:
-
-```
-$ curl "http://localhost:8080/api"
-```
-
-## How does it work
-
-
-
-### Hello service
- 
-Files:
-
-|File|Description|
-|---|---|
-|src/main/resources/settings.json| Service configuration file |
-|src/main/java/myorg/myservice/Service.java | Service kernel |
-|src/main/java/myorg/myservice/in/hello/HelloHttpAdapter.java | |
-|src/main/java/myorg/myservice/events/HelloEvent.java| |
-|src/main/java/myorg/myservice/events/UserEvent.java| |
-|src/main/java/myorg/myservice/events/MyEvent.java| |
-|src/main/java/myorg/myservice/out/MyWorker.java| |
-|src/main/java/myorg/myservice/out/UserManager.java| |

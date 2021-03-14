@@ -3,6 +3,7 @@
     "description": "Signomix integration service",
     "services": [
         {
+            "@type": "org.cricketmsf.config.Configuration",
             "id": "SignomixIntegration",
             "service": "com.signomix.IntegrationService",
             "properties": {
@@ -13,7 +14,7 @@
                 {
                     "name": "IotAPI",
                     "interfaceName": "HttpPortedAdapterIface",
-                    "classFullName": "com.signomix.in.IotApi",
+                    "className": "com.signomix.in.IotApi",
                     "properties": {
                         "context": "/api/i4t",
                         "authorization-required": "true",
@@ -24,7 +25,7 @@
                 {
                     "name": "DataIntegrationApi",
                     "interfaceName": "HttpPortedAdapterIface",
-                    "classFullName": "com.signomix.in.IotApi",
+                    "className": "com.signomix.in.IotApi",
                     "properties": {
                         "context": "/api/integration",
                         "silent-mode": "false",
@@ -34,7 +35,7 @@
                 {
                     "name": "EventDispatcher",
                     "interfaceName": "DispatcherIface",
-                    "classFullName": "com.signomix.out.dispatcher.RabbitDispatcher",
+                    "className": "com.signomix.out.dispatcher.RabbitDispatcher",
                     "description": "",
                     "properties": {
                         "url": "rabbitmq",
@@ -47,7 +48,7 @@
                 {
                     "name": "EventListener",
                     "interfaceName": "",
-                    "classFullName": "com.signomix.in.dispatcher.RabbitEventListener",
+                    "className": "com.signomix.in.dispatcher.RabbitEventListener",
                     "description": "",
                     "properties": {
                         "url": "rabbitmq",
@@ -59,7 +60,7 @@
                 {
                     "name": "iotAdapter",
                     "interfaceName": "ThingsDataIface",
-                    "classFullName": "com.signomix.out.iot.ThingsDataEmbededAdapter",
+                    "className": "com.signomix.out.iot.ThingsDataEmbededAdapter",
                     "properties": {
                         "helper-name": "iotDB",
                         "helper-name2": "iotDataDB"
@@ -68,7 +69,7 @@
                 {
                     "name": "userAdapter",
                     "interfaceName": "UserAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
+                    "className": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
                     "properties": {
                         "helper-name": "userDB"
                     }
@@ -76,7 +77,7 @@
                 {
                     "name": "scriptingAdapter",
                     "interfaceName": "ScriptingAdapterIface",
-                    "classFullName": "com.signomix.out.script.NashornScriptingAdapter",
+                    "className": "com.signomix.out.script.NashornScriptingAdapter",
                     "properties": {
                         "script-file": "./config/device-script-template.js",
                         "decoder-envelope-location": "./config/payload-decoder-envelope.js",
@@ -86,7 +87,7 @@
                 {
                     "name": "ActuatorService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "com.signomix.in.http.ActuatorApi",
+                    "className": "com.signomix.in.http.ActuatorApi",
                     "properties": {
                         "context": "/api/actuator",
                         "dump-request": "true",
@@ -96,7 +97,7 @@
                 {
                     "name": "iotDB",
                     "interfaceName": "IotDatabaseIface",
-                    "classFullName": "com.signomix.out.db.H2RemoteIotDB",
+                    "className": "com.signomix.out.db.H2RemoteIotDB",
                     "properties": {
                         "host": "dbserver",
                         "file": "iot",
@@ -110,7 +111,7 @@
                 {
                     "name": "iotDataDB",
                     "interfaceName": "IotDataStorageIface",
-                    "classFullName": "com.signomix.out.db.H2RemoteDataStorageDB",
+                    "className": "com.signomix.out.db.H2RemoteDataStorageDB",
                     "properties": {
                         "host": "dbserver",
                         "file": "data",
@@ -124,7 +125,7 @@
                 {
                     "name": "actuatorCommandsDB",
                     "interfaceName": "ActuatorCommandsDBIface",
-                    "classFullName": "com.signomix.out.db.H2RemoteCommandsDB",
+                    "className": "com.signomix.out.db.H2RemoteCommandsDB",
                     "properties": {
                         "host": "dbserver",
                         "dbfile": "actuator",

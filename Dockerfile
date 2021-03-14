@@ -1,11 +1,10 @@
-/**
- * Copyright (C) Grzegorz Skorupa 2021.
- * Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
- */
+# Copyright (C) Grzegorz Skorupa 2021.
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+
 FROM azul/zulu-openjdk-alpine:13
 
 WORKDIR /usr/signomix
-RUN mkdir /usr/signomix/dbdata/logs
+RUN mkdir /usr/signomix/logs
 
 COPY target/signomix-iot.jar /usr/signomix/
 COPY src/main/resources/settings.json /usr/signomix/config/
