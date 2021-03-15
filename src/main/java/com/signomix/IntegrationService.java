@@ -100,4 +100,12 @@ public class IntegrationService extends MinimalService {
     public ActuatorApi getActuatorApi() {
         return actuatorApi;
     }
+    
+    public IotDataStorageIface getIotDataDB(){
+        return iotDataDB;
+    }
+    
+    public IotDatabaseIface getIotDB(){
+        return thingsDB;
+    }
 }

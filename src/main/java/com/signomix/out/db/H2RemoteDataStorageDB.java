@@ -4,7 +4,7 @@
  */
 package com.signomix.out.db;
 
-import com.signomix.Service;
+import com.signomix.IntegrationService;
 import com.signomix.out.iot.ChannelData;
 import com.signomix.out.iot.DataQuery;
 import com.signomix.out.iot.DataQueryException;
@@ -19,11 +19,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.db.H2RemoteDB;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.SqlDBIface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -31,6 +32,7 @@ import org.cricketmsf.out.db.SqlDBIface;
  */
 public class H2RemoteDataStorageDB extends H2RemoteDB implements SqlDBIface, IotDataStorageIface, Adapter {
 
+    private static final Logger logger = LoggerFactory.getLogger(H2RemoteDataStorageDB.class);
     private int requestLimit = 0; //no limit
 
     @Override
@@ -38,10 +40,10 @@ public class H2RemoteDataStorageDB extends H2RemoteDB implements SqlDBIface, Iot
         super.loadProperties(properties, adapterName);
         try {
             requestLimit = Integer.parseInt(properties.getOrDefault("requestLimit", "500"));
-            Kernel.getInstance().getLogger().print("\trequestLimit: " + requestLimit);
+            logger.info("\trequestLimit: " + requestLimit);
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), e.getMessage()));
+            logger.error(e.getMessage());
         }
     }
 
@@ -520,7 +522,7 @@ public class H2RemoteDataStorageDB extends H2RemoteDB implements SqlDBIface, Iot
             conn.close();
             return result;
         } catch (SQLException e) {
-            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "problematic query = " + query));
+            logger.error("problematic query = " + query);
             e.printStackTrace();
             throw new ThingsDataException(ThingsDataException.HELPER_EXCEPTION, e.getMessage());
         }
@@ -565,8 +567,8 @@ public class H2RemoteDataStorageDB extends H2RemoteDB implements SqlDBIface, Iot
      */
     @Override
     public List<List> getValuesOfGroup(String userID, String groupEUI, String[] channelNames) throws ThingsDataException {
-        List<Device> groupDevices = ((Service) Kernel.getInstance()).getThingsAdapter().getGroupDevices(userID, groupEUI);
-        List<String> groupChannels = ((Service) Kernel.getInstance()).getThingsAdapter().getGroupChannels(groupEUI);
+        List<Device> groupDevices = ((IntegrationService) Kernel.getInstance()).getThingsAdapter().getGroupDevices(userID, groupEUI);
+        List<String> groupChannels = ((IntegrationService) Kernel.getInstance()).getIotDB().getGroupChannels(groupEUI);
         List<List> tmp, tmpValues;
         List<List> result = new ArrayList();
         List<ChannelData> row;
