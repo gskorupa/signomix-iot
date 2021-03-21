@@ -200,10 +200,24 @@ public class PlatformAdministrationModule {
      * @param actuatorCommandsDB
      */
     public void initDatabases(
+            KeyValueDBIface database,
             IotDatabaseIface thingsDB,
             IotDataStorageIface iotDataDB,
             ActuatorCommandsDBIface actuatorCommandsDB
     ) {
+        // SYSTEM key parameters and limits
+        try {
+            database.addTable("signomix", 5, true);
+        } catch (KeyValueDBException e) {
+            logger.info(e.getMessage());
+        }
+        try {
+            Invariants platformLimits = new Invariants();
+            database.put("signomix", "platformlimits", platformLimits);
+        } catch (KeyValueDBException e) {
+            logger.info(e.getMessage());
+        }
+        readPlatformConfig(database);
         // IoT
         //TODO: configurable number of devices
         if (thingsDB != null) {
@@ -345,7 +359,12 @@ public class PlatformAdministrationModule {
         // IoT actuator commands (storing events with actuator commands)
         if (actuatorCommandsDB != null) {
             try {
-                actuatorCommandsDB.addTable("commands", (int) platformConfig.get("primaryDevicesLimit") * (int) platformConfig.get("maxUsers"), true);
+                if(null==platformConfig){
+                    logger.error("platformConfig is null");
+                }
+                int primaryLimit=(int) platformConfig.get("primaryDevicesLimit");
+                int maxUsers=(int) platformConfig.get("maxUsers");
+                actuatorCommandsDB.addTable("commands", primaryLimit * maxUsers, true);
             } catch (ClassCastException | KeyValueDBException e) {
                 logger.info(e.getMessage());
             }
@@ -354,6 +373,18 @@ public class PlatformAdministrationModule {
             } catch (ClassCastException | KeyValueDBException e) {
                 logger.info(e.getMessage());
             }
+        }
+        // SYSTEM key parameters and limits
+        try {
+            database.addTable("signomix", 5, true);
+        } catch (KeyValueDBException e) {
+            logger.info(e.getMessage());
+        }
+        try {
+            Invariants platformLimits = new Invariants();
+            database.put("signomix", "platformlimits", platformLimits);
+        } catch (KeyValueDBException e) {
+            logger.info(e.getMessage());
         }
     }
 

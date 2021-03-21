@@ -13,6 +13,13 @@ public class ActuatorEvent extends Event {
         super();
     }
     
+    public ActuatorEvent(String origin, String payload, String hexPayload) {
+        super();
+        data.put("origin", origin);
+        data.put("payload", payload);
+        data.put("hexpayload", hexPayload);
+    }
+    
     public ActuatorEvent data(HashMap<String,Object> newData){
         this.data=newData;
         return this;

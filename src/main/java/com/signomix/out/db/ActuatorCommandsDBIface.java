@@ -4,6 +4,7 @@
  */
 package com.signomix.out.db;
 
+import com.signomix.events.ActuatorEvent;
 import com.signomix.out.iot.ThingsDataException;
 import java.util.List;
 import org.cricketmsf.event.Event;
@@ -15,7 +16,7 @@ import org.cricketmsf.out.db.KeyValueDBIface;
  */
 public interface ActuatorCommandsDBIface extends KeyValueDBIface {
 
-    public void putDeviceCommand(String deviceEUI, Event commandEvent) throws ThingsDataException;
+    public void putDeviceCommand(String deviceEUI, ActuatorEvent commandEvent) throws ThingsDataException;
 
     /**
      *
@@ -23,9 +24,9 @@ public interface ActuatorCommandsDBIface extends KeyValueDBIface {
      * @return
      * @throws ThingsDataException
      */
-    public Event getFirstCommand(String deviceEUI) throws ThingsDataException;
+    public ActuatorEvent getFirstCommand(String deviceEUI) throws ThingsDataException;
 
-    public Event previewDeviceCommand(String deviceEUI, Event commandEvent) throws ThingsDataException;
+    public ActuatorEvent previewDeviceCommand(String deviceEUI, ActuatorEvent commandEvent) throws ThingsDataException;
 
     public void clearAllCommands(String deviceEUI, long checkPoint) throws ThingsDataException;
 
@@ -33,9 +34,9 @@ public interface ActuatorCommandsDBIface extends KeyValueDBIface {
     
     public void removeCommand(long id) throws ThingsDataException;
 
-    public List<Event> getAllCommands(String deviceEUI) throws ThingsDataException;
+    public List<ActuatorEvent> getAllCommands(String deviceEUI) throws ThingsDataException;
 
-    public void putCommandLog(String deviceEUI, Event commandEvent) throws ThingsDataException;
+    public void putCommandLog(String deviceEUI, ActuatorEvent commandEvent) throws ThingsDataException;
 
     //public Event getFirstLog(String deviceEUI) throws ThingsDataException;
 
@@ -43,5 +44,5 @@ public interface ActuatorCommandsDBIface extends KeyValueDBIface {
 
     public void removeAllLogs(String deviceEUI) throws ThingsDataException;
 
-    public List<Event> getAllLogs(String deviceEUI) throws ThingsDataException;
+    public List<ActuatorEvent> getAllLogs(String deviceEUI) throws ThingsDataException;
 }

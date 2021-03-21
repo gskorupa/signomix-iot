@@ -58,36 +58,36 @@
                     }
                 },
                 {
-                    "name": "iotAdapter",
+                    "name": "IotAdapter",
                     "interfaceName": "ThingsDataIface",
                     "className": "com.signomix.out.iot.ThingsDataEmbededAdapter",
                     "properties": {
-                        "helper-name": "iotDB",
-                        "helper-name2": "iotDataDB"
+                        "helper-name": "IotDB",
+                        "helper-name2": "IotDataDB"
                     }
                 },
                 {
-                    "name": "userAdapter",
+                    "name": "UserAdapter",
                     "interfaceName": "UserAdapterIface",
                     "className": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
                     "properties": {
-                        "helper-name": "userDB"
+                        "helper-name": "UserDB"
                     }
                 },
                 {
-                    "name": "scriptingAdapter",
+                    "name": "ScriptingAdapter",
                     "interfaceName": "ScriptingAdapterIface",
                     "className": "com.signomix.out.script.NashornScriptingAdapter",
                     "properties": {
                         "script-file": "./config/device-script-template.js",
                         "decoder-envelope-location": "./config/payload-decoder-envelope.js",
-                        "helper-name": "iotAdapter"
+                        "helper-name": "IotAdapter"
                     }
                 },
                 {
                     "name": "ActuatorService",
                     "interfaceName": "HttpAdapterIface",
-                    "className": "com.signomix.in.http.ActuatorApi",
+                    "className": "com.signomix.in.ActuatorApi",
                     "properties": {
                         "context": "/api/actuator",
                         "dump-request": "true",
@@ -95,40 +95,51 @@
                     }
                 },
                 {
-                    "name": "iotDB",
+                    "name": "Database",
+                    "interfaceName": "KeyValueDBIface",
+                    "className": "org.cricketmsf.out.db.KeyValueDB",
+                    "properties": {
+                        "path": "./data",
+                        "name": "local"
+                    }
+                },
+                {
+                    "name": "IotDB",
                     "interfaceName": "IotDatabaseIface",
                     "className": "com.signomix.out.db.H2RemoteIotDB",
                     "properties": {
                         "host": "dbserver",
+                        "dbfile": "/h2data/iot",
                         "file": "iot",
                         "test-query": "select * from serviceversion",
-                        "version": "9",
+                        "version": "1",
                         "user": "sa",
                         "password": "",
                         "time-offset": "3600"
                     }
                 },
                 {
-                    "name": "iotDataDB",
+                    "name": "IotDataDB",
                     "interfaceName": "IotDataStorageIface",
                     "className": "com.signomix.out.db.H2RemoteDataStorageDB",
                     "properties": {
                         "host": "dbserver",
+                        "dbfile": "/h2data/data",
                         "file": "data",
                         "test-query": "select * from serviceversion",
-                        "version": "3",
+                        "version": "1",
                         "user": "sa",
                         "password": "",
                         "requestLimit": "250"
                     }
                 },
                 {
-                    "name": "actuatorCommandsDB",
+                    "name": "ActuatorCommandsDB",
                     "interfaceName": "ActuatorCommandsDBIface",
                     "className": "com.signomix.out.db.H2RemoteCommandsDB",
                     "properties": {
                         "host": "dbserver",
-                        "dbfile": "actuator",
+                        "dbfile": "/h2data/actuator",
                         "test-query": "select * from serviceversion",
                         "version": "1",
                         "name": "auth",

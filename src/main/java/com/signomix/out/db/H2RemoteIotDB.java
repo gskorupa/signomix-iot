@@ -5,7 +5,6 @@
 package com.signomix.out.db;
 
 import com.signomix.out.gui.Dashboard;
-//import com.signomix.out.iot.Alert;
 import com.signomix.out.iot.Device;
 import com.signomix.out.iot.DeviceGroup;
 import com.signomix.out.iot.DeviceTemplate;
@@ -18,10 +17,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.event.Event;
-import org.cricketmsf.Kernel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -460,6 +457,7 @@ public class H2RemoteIotDB extends H2RemoteDB implements SqlDBIface, IotDatabase
 
     @Override
     public void addAlert(Event event) throws ThingsDataException {
+        /*
         Alert alert = new Alert(event);
         String query = "insert into alerts (id,name,category,type,deviceeui,userid,payload,timepoint,serviceid,uuid,calculatedtimepoint,createdat,rooteventid,cyclic) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         try (Connection conn = getConnection()) {
@@ -490,10 +488,15 @@ public class H2RemoteIotDB extends H2RemoteDB implements SqlDBIface, IotDatabase
         } catch (Exception e) {
             e.printStackTrace();
         }
+        */
+        logger.error("method not implemented");
     }
 
     @Override
     public List getAlerts(String userID, boolean descending) throws ThingsDataException {
+        logger.error("method not implemented");
+        return null;
+        /*
         String query = "select id,name,category,type,deviceeui,userid,payload,timepoint,serviceid,uuid,calculatedtimepoint,createdat,rooteventid,cyclic from alerts where userid = ? order by id";
         if (descending) {
             query = query.concat(" desc");
@@ -510,6 +513,7 @@ public class H2RemoteIotDB extends H2RemoteDB implements SqlDBIface, IotDatabase
         } catch (SQLException e) {
             throw new ThingsDataException(ThingsDataException.HELPER_EXCEPTION, e.getMessage());
         }
+        */
     }
 
     @Override
@@ -693,7 +697,11 @@ public class H2RemoteIotDB extends H2RemoteDB implements SqlDBIface, IotDatabase
         return d;
     }
 
+    /*
     Alert buildAlert(ResultSet rs) throws SQLException {
+        logger.error("method not implemented");
+        return null;
+        
         //id,name,category,type,deviceeui,userid,payload,timepoint,serviceid,uuid,calculatedtimepoint,createdat,rooteventid,cyclic        Device d = new Device();
         Alert a = new Alert();
         a.setId(rs.getLong(1));
@@ -710,7 +718,9 @@ public class H2RemoteIotDB extends H2RemoteDB implements SqlDBIface, IotDatabase
         a.setRootEventId(rs.getLong(13));
         a.setCyclic(rs.getBoolean(14));
         return a;
+        
     }
+    */
 
     Dashboard buildDashboard(ResultSet rs) throws SQLException {
         //id,name,userid,title,team,widgets,token,shared

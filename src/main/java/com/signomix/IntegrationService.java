@@ -25,6 +25,7 @@ import com.signomix.out.db.IotDatabaseIface;
 import com.signomix.out.iot.ThingsDataIface;
 import com.signomix.out.script.ScriptingAdapterIface;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
+import org.cricketmsf.out.db.KeyValueDBIface;
 
 public class IntegrationService extends MinimalService {
 
@@ -36,6 +37,7 @@ public class IntegrationService extends MinimalService {
     private ThingsDataIface thingsAdapter;
     private UserAdapterIface userAdapter;
     
+    KeyValueDBIface database = null;
     IotDatabaseIface thingsDB = null;
     IotDataStorageIface iotDataDB = null;
     private ActuatorCommandsDBIface actuatorCommandsDB;
@@ -52,18 +54,19 @@ public class IntegrationService extends MinimalService {
         super.getAdapters();
         userAdapter = (UserAdapterIface) getAdaptersMap().get("UserAdapter");
         scriptingAdapter = (ScriptingAdapterIface) getAdaptersMap().get("ScriptingAdapter");
-        thingsAdapter = (ThingsDataIface) getAdaptersMap().get("iotAdapter");
+        thingsAdapter = (ThingsDataIface) getAdaptersMap().get("IotAdapter");
         actuatorApi = (ActuatorApi) getAdaptersMap().get("ActuatorService");
-        thingsDB = (IotDatabaseIface) getAdaptersMap().get("iotDB");
-        iotDataDB = (IotDataStorageIface) getAdaptersMap().get("iotDataBD");
-        actuatorCommandsDB = (ActuatorCommandsDBIface) getAdaptersMap().get("actuatorCommandsDB");
+        database = (KeyValueDBIface) getRegistered("Database");
+        thingsDB = (IotDatabaseIface) getAdaptersMap().get("IotDB");
+        iotDataDB = (IotDataStorageIface) getAdaptersMap().get("IotDataDB");
+        actuatorCommandsDB = (ActuatorCommandsDBIface) getAdaptersMap().get("ActuatorCommandsDB");
     }
 
     @Override
     public void runInitTasks() {
         super.runInitTasks();
         invariants = new Invariants();
-        PlatformAdministrationModule.getInstance().initDatabases(thingsDB,iotDataDB, actuatorCommandsDB);
+        PlatformAdministrationModule.getInstance().initDatabases(database,thingsDB,iotDataDB, actuatorCommandsDB);
     }
 
     /**
