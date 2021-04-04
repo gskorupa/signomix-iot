@@ -73,15 +73,19 @@ public class RabbitEventListener extends InboundAdapter implements Adapter, Even
             channel.queueBind(queueName, exchangeName, "");
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String serializedEvent = new String(delivery.getBody(), "UTF-8");
-                logger.info("HANDLING " + serializedEvent);
-                EventDto edto = EventDto.fromJson(serializedEvent);
                 try {
+                    EventDto edto = EventDto.fromJson(serializedEvent);
                     Event event = (Event) Class.forName(edto.eventClassName).newInstance();
                     new Thread(
                             new EventHandler(event)
                     ).start();
+                } catch (ClassCastException ex) {
+                    //probably event from signomix version 1
+                    logger.warn("event from signomix v1 can't be handled: {}", ex.getMessage());
+                    logger.warn("problem with {}",serializedEvent);
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
                     logger.error(ex.getMessage());
+                    logger.warn("problem with {}",serializedEvent);
                 }
             };
             channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {

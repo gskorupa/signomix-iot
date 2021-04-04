@@ -28,7 +28,7 @@ public class IntegrationServiceRouter {
 
     @EventHook(className = "com.signomix.events.NewDataEvent")
     public Object handleNewData(NewDataEvent event) {
-        IotData data = event.getData();
+        IotData data = (IotData)event.getData();
         StandardResult result = new StandardResult();
         try {
             return DeviceIntegrationModule.getInstance().processGenericRequest(data);

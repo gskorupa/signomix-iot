@@ -4,6 +4,7 @@
  */
 package com.signomix.out;
 
+import com.signomix.events.ActuatorEvent;
 import com.signomix.out.iot.ChannelData;
 import com.signomix.out.iot.Device;
 import com.signomix.out.script.ScriptAdapterException;

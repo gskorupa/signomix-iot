@@ -239,9 +239,11 @@ public class H2RemoteDataStorageDB extends H2RemoteDB implements SqlDBIface, Iot
 
     @Override
     public void putData(String userID, String deviceEUI, String project, Double deviceState, List<ChannelData> values) throws ThingsDataException {
+        System.out.println("PUT DATA");
         if (values == null || values.isEmpty()) {
             return;
         }
+        System.out.println("PUT DATA2");
         int limit = 24;
         List channelNames = getDeviceChannels(deviceEUI);
         String query = "insert into devicedata (eui,userid,day,dtime,tstamp,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11,d12,d13,d14,d15,d16,d17,d18,d19,d20,d21,d22,d23,d24,project,state) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -284,8 +286,10 @@ public class H2RemoteDataStorageDB extends H2RemoteDB implements SqlDBIface, Iot
             pst.close();
             conn.close();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new ThingsDataException(ThingsDataException.BAD_REQUEST, e.getMessage());
         }
+        System.out.println("temperature: "+getLastValue(userID, deviceEUI, "temperature").getValue());
     }
 
     @Override
