@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>com.signomix</groupId>
-            <artifactId>signomix-el</artifactId>
+            <artifactId>signomix-common</artifactId>
             <version>0.0.1</version>
         </dependency>
         <dependency>
