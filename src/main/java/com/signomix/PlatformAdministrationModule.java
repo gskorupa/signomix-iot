@@ -4,14 +4,11 @@
  */
 package com.signomix;
 
-import com.signomix.out.db.ActuatorCommandsDBIface;
-import com.signomix.out.db.IotDataStorageIface;
 import com.signomix.out.db.IotDatabaseIface;
 import com.signomix.out.gui.Dashboard;
 import com.signomix.out.gui.DashboardAdapterIface;
 import com.signomix.out.gui.DashboardException;
 import com.signomix.out.gui.Widget;
-import com.signomix.out.iot.ActuatorDataIface;
 import com.signomix.out.iot.Channel;
 import com.signomix.out.iot.Device;
 import com.signomix.out.iot.DeviceGroup;
@@ -83,100 +80,6 @@ public class PlatformAdministrationModule {
             logger.error(ex.getMessage());
         }
     }
-
-    /**
-     * Process API requests related to platform administration
-     *
-     * @param event HTTP request encapsulated in Event object
-     * @return Result object encapsulating HTTP response
-     */
-    /*
-    public Object handleRestEvent(Event event) {
-        RequestObject request = event.getRequest();
-        String method = request.method;
-        String moduleName = request.pathExt;
-        StandardResult result = new StandardResult();
-        if ("OPTIONS".equalsIgnoreCase(method)) {
-            result.setCode(HttpAdapter.SC_OK);
-        }
-        String userID = request.headers.getFirst("X-user-id");
-        List<String> roles = request.headers.get("X-user-role");
-        if (!hasAccessRights(userID, roles)) {
-            result.setCode(HttpAdapter.SC_FORBIDDEN);
-            return result;
-        }
-        if ("GET".equalsIgnoreCase(method)) {
-            switch (moduleName.toLowerCase()) {
-                case "status":
-                    result = getServiceInfo();
-                    break;
-                case "config":
-                    result = getServiceConfig();
-                    break;
-                case "dbclean":
-                    // we want to run database maintenance in separated thread, so we need to fire event
-                    Kernel.getInstance().dispatchEvent(
-                            new Event(
-                                    this.getClass().getSimpleName(),
-                                    Event.CATEGORY_GENERIC,
-                                    "CLEAR_DATA",
-                                    "+5s",
-                                    event.getRequestParameter("category") + "," + event.getRequestParameter("type")
-                            )
-                    );
-                    result.setCode(HttpAdapter.SC_ACCEPTED);
-                    break;
-                case "shutdown":
-                    result.setCode(HttpAdapter.SC_ACCEPTED);
-                    result.setData("the service will be stopped within few seconds");
-                    Kernel.getInstance().handleEvent(
-                            new Event(
-                                    this.getClass().getSimpleName(),
-                                    Event.CATEGORY_GENERIC,
-                                    "SHUTDOWN",
-                                    "+5s",
-                                    ""
-                            )
-                    );
-                    break;
-                default:
-                    result.setCode(HttpAdapter.SC_BAD_REQUEST);
-            }
-        } else if ("POST".equalsIgnoreCase(method)) {
-            switch (moduleName.toLowerCase()) {
-                case "database":
-                    String adapterName = (String) request.parameters.getOrDefault("adapter", "");
-                    String query = (String) request.parameters.get("query");
-                    if (null != query) {
-                        SqlDBIface adapter = (SqlDBIface) Kernel.getInstance().getAdaptersMap().get(adapterName);
-                        try {
-                            result.setData(adapter.execute(query));
-                        } catch (SQLException ex) {
-                            result.setCode(HttpAdapter.SC_BAD_REQUEST);
-                            result.setData(ex.getMessage());
-                        }
-                    } else {
-                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
-                        result.setData("query not set");
-                    }
-                    break;
-                case "status":
-                    String newStatus = (String) request.parameters.getOrDefault("status", "");
-                    if ("online".equalsIgnoreCase(newStatus)) {
-                        Kernel.getInstance().setStatus(Kernel.ONLINE);
-                    } else if ("maintenance".equalsIgnoreCase(newStatus)) {
-                        Kernel.getInstance().setStatus(Kernel.MAINTENANCE);
-                    }
-                    result = getServiceInfo();
-                    break;
-            }
-        } else {
-            result.setCode(HttpAdapter.SC_METHOD_NOT_ALLOWED);
-        }
-        return result;
-    }
-    */
-
     private StandardResult getServiceInfo() {
         StandardResult result = new StandardResult();
         result.setData(Kernel.getInstance().reportStatus());
@@ -201,9 +104,7 @@ public class PlatformAdministrationModule {
      */
     public void initDatabases(
             KeyValueDBIface database,
-            IotDatabaseIface thingsDB,
-            IotDataStorageIface iotDataDB,
-            ActuatorCommandsDBIface actuatorCommandsDB
+            IotDatabaseIface thingsDB
     ) {
         // SYSTEM key parameters and limits
         try {
@@ -227,9 +128,6 @@ public class PlatformAdministrationModule {
                 thingsDB.addTable("dashboards", 3 * (int) platformConfig.get("primaryDevicesLimit") * (int) platformConfig.get("maxUsers"), true);
                 thingsDB.addTable("alerts", 100 * (int) platformConfig.get("maxUsers"), true);
                 thingsDB.addTable("groups", (int) platformConfig.get("primaryDevicesLimit") * (int) platformConfig.get("maxUsers"), true);
-                iotDataDB.addTable("devicedata", 1000 * (int) platformConfig.get("primaryDevicesLimit") * (int) platformConfig.get("maxUsers"), true);
-                iotDataDB.addTable("devicechannels", 2 * (int) platformConfig.get("primaryDevicesLimit") * (int) platformConfig.get("maxUsers"), true);
-                //thingsDB.addTable("widgets", 1000, true);
                 //templates
                 LinkedHashMap<String, Channel> channels;
                 Channel ch;
@@ -265,9 +163,8 @@ public class PlatformAdministrationModule {
 
                 Random r = new Random(System.currentTimeMillis());
                 device.setKey("6022140857");
-                //thingsDB.put("devices", device.getEUI(), device);
                 thingsDB.putDevice(device);
-                iotDataDB.updateDeviceChannels(device, null);
+                //iotDataDB.updateDeviceChannels(device, null);
 
                 Dashboard dashboard = new Dashboard();
                 dashboard.setName("emulator");
@@ -355,59 +252,8 @@ public class PlatformAdministrationModule {
                 e.printStackTrace();
             }
         }
-
-        // IoT actuator commands (storing events with actuator commands)
-        if (actuatorCommandsDB != null) {
-            try {
-                if(null==platformConfig){
-                    logger.error("platformConfig is null");
-                }
-                int primaryLimit=(int) platformConfig.get("primaryDevicesLimit");
-                int maxUsers=(int) platformConfig.get("maxUsers");
-                actuatorCommandsDB.addTable("commands", primaryLimit * maxUsers, true);
-            } catch (ClassCastException | KeyValueDBException e) {
-                logger.info(e.getMessage());
-            }
-            try {
-                actuatorCommandsDB.addTable("commandslog", (int) platformConfig.get("primaryDevicesLimit") * (int) platformConfig.get("maxUsers") * 100, true);
-            } catch (ClassCastException | KeyValueDBException e) {
-                logger.info(e.getMessage());
-            }
-        }
-        // SYSTEM key parameters and limits
-        try {
-            database.addTable("signomix", 5, true);
-        } catch (KeyValueDBException e) {
-            logger.info(e.getMessage());
-        }
-        try {
-            Invariants platformLimits = new Invariants();
-            database.put("signomix", "platformlimits", platformLimits);
-        } catch (KeyValueDBException e) {
-            logger.info(e.getMessage());
-        }
+        
     }
-
-    /**
-     * Creates events that should be fired on the Service start.
-     */
-    /*
-    public void initScheduledTasks(SchedulerIface scheduler) {
-        String initialTasks = scheduler.getProperty("init");
-        String[] params;
-        String[] tasks;
-        if (initialTasks != null && !initialTasks.isEmpty()) {
-            tasks = initialTasks.split(";");
-            for (int i = 0; i < tasks.length; i++) {
-                params = tasks[i].split(",");
-                if (params.length == 6) {
-                    scheduler.handleEvent(
-                            new Event(params[1], params[2], params[3], params[4], params[5]).putName(params[0]), false, true);
-                }
-            }
-        }
-    }
-    */
     
     public void buildDefaultDashboard(String deviceId, ThingsDataIface thingsAdapter, DashboardAdapterIface dashboardAdapter, AuthAdapterIface authAdapter) {
         Device device = null;
@@ -466,16 +312,11 @@ public class PlatformAdministrationModule {
             ThingsDataIface thingsAdapter,
             AuthAdapterIface authAdapter,
             KeyValueDBIface database,
-            DashboardAdapterIface dashboardAdapter,
-            ActuatorDataIface actuatorAdapter) {
+            DashboardAdapterIface dashboardAdapter) {
 
-        //System.out.println("CLEARDATA:" + dataCategory + "," + userType);
-        clearExpiredTokens(database);
         if (demoMode) {
-            clearAllUsersData(userType, dataCategory, userAdapter, thingsAdapter, dashboardAdapter, actuatorAdapter);
+            clearAllUsersData(userType, dataCategory, userAdapter, thingsAdapter, dashboardAdapter);
         }
-        clearNotConfirmed(userAdapter);
-        clearOldData(demoMode, userAdapter, thingsAdapter, actuatorAdapter);
         logger.info("Clearing data done.");
     }
 
@@ -602,7 +443,7 @@ public class PlatformAdministrationModule {
     }
 
     private void clearAllUsersData(String userType, String dataCategory, UserAdapterIface userAdapter,
-            ThingsDataIface thingsAdapter, DashboardAdapterIface dashboardAdapter, ActuatorDataIface actuatorAdapter) {
+            ThingsDataIface thingsAdapter, DashboardAdapterIface dashboardAdapter) {
         //clear user data (cascade: alerts, devices, dashboards, users)
         int userTypeToRemove = -1;
         switch (userType.toUpperCase()) {
@@ -642,176 +483,19 @@ public class PlatformAdministrationModule {
                 while (it.hasNext()) {
                     uid = (String) it.next();
                     if (userAdapter.get(uid).getType() == userTypeToRemove) {
-                        if ("ALL".equalsIgnoreCase(dataCategory) || "ALERTS".equalsIgnoreCase(dataCategory)) {
-                            thingsAdapter.removeUserAlerts(uid);
-                        }
                         if ("ALL".equalsIgnoreCase(dataCategory) || "DASHBOARDS".equalsIgnoreCase(dataCategory)) {
                             dashboardAdapter.removeUserDashboards(uid);
-                        }
-                        devices = thingsAdapter.getUserDevices(uid, false);
-                        if ("ALL".equalsIgnoreCase(dataCategory) || "CHANNELS".equalsIgnoreCase(dataCategory) || "DEVICES".equalsIgnoreCase(dataCategory)) {
-                            for (int j = 0; j < devices.size(); j++) {
-                                thingsAdapter.removeAllChannels(devices.get(j).getEUI());
-                            }
                         }
                         if ("ALL".equalsIgnoreCase(dataCategory) || "DEVICES".equalsIgnoreCase(dataCategory)) {
                             thingsAdapter.removeAllDevices(uid);
                         }
-                        if ("ALL".equalsIgnoreCase(dataCategory) || "COMMANDS".equalsIgnoreCase(dataCategory)) {
-                            actuatorAdapter.removeAllCommands(uid);
-                        }
                     }
                 }
-            } catch (DashboardException| UserException | ThingsDataException ex) {
+            } catch (DashboardException | UserException| ThingsDataException ex) {
                 ex.printStackTrace();
             }
         }
 
-    }
-
-    private void clearNotConfirmed(UserAdapterIface userAdapter) {
-        try {
-            Map users = userAdapter.getAll();
-            long TWO_DAYS = 48 * 3600 * 1000;
-            Iterator it = users.keySet().iterator();
-            String uid;
-            while (it.hasNext()) {
-                uid = (String) it.next();
-                //remove users when registration is not confirmed after two days
-                if (!((User) users.get(uid)).isConfirmed() && (System.currentTimeMillis() - ((User) users.get(uid)).getCreatedAt() > TWO_DAYS)) {
-                    userAdapter.remove((String) uid);
-                }
-            }
-        } catch (UserException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /**
-     * Removes user's channel data, alerts
-     *
-     * @param demoMode
-     * @param userAdapter
-     * @param thingsAdapter
-     * @param dashboardAdapter
-     */
-    private void clearOldData(boolean demoMode, UserAdapterIface userAdapter, ThingsDataIface thingsAdapter, ActuatorDataIface actuatorAdapter) {
-        // data retention
-        // how long data is kept in signomix depends on user userType
-        long ONE_DAY = 24 * 3600 * 1000;
-        try {
-            long freeRetention = ONE_DAY * (int) getPlatformConfig().get("freeDataRetention");
-            long extendedRetention = ONE_DAY * (int) getPlatformConfig().get("extendedDataRetention");
-            long standardRetention = ONE_DAY * (int) getPlatformConfig().get("standardDataRetention");
-            long primaryRetention = ONE_DAY * (int) getPlatformConfig().get("primaryDataRetention");
-            long superuserRetention = ONE_DAY * (int) getPlatformConfig().get("superDataRetention");
-            Map users = userAdapter.getAll();
-            List<Device> devices;
-            Iterator it = users.keySet().iterator();
-            String uid;
-            long now = System.currentTimeMillis();
-            long tooOldPoint = now - 2 * ONE_DAY;
-            long tooOldPointFree = now - freeRetention;
-            long tooOldPointExtended = now - extendedRetention;
-            long tooOldPointStandard = now - standardRetention;
-            long tooOldPointPrimary = now - primaryRetention;
-            long tooOldPointSuperuser = now - superuserRetention;
-            while (it.hasNext()) {
-                uid = (String) it.next();
-                if (!demoMode) {
-                    switch (userAdapter.get(uid).getType()) {
-                        case User.OWNER:
-                        case User.PRIMARY:
-                            tooOldPoint = tooOldPointPrimary;
-                            break;
-                        case User.USER:
-                            tooOldPoint = tooOldPointStandard;
-                            break;
-                        case User.EXTENDED:
-                            tooOldPoint = tooOldPointExtended;
-                            break;
-                        case User.SUPERUSER:
-                            tooOldPoint = tooOldPointSuperuser;
-                            break;
-                        default:
-                            tooOldPoint = tooOldPointFree;
-                    }
-                }
-                thingsAdapter.removeUserAlerts(uid, tooOldPoint);
-                devices = thingsAdapter.getUserDevices(uid, false);
-                for (int j = 0; j < devices.size(); j++) {
-                    thingsAdapter.clearAllChannels(devices.get(j).getEUI(), tooOldPoint);
-                    try {
-                        actuatorAdapter.clearAllCommands(devices.get(j).getEUI(), tooOldPoint);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (ClassCastException | UserException | ThingsDataException ex) {
-            logger.error(ex.getMessage());
-            ex.printStackTrace();
-        }
-    }
-
-    /**
-     * Removes user's data, alerts when collection exceeds allowed size
-     *
-     * @param demoMode
-     * @param userAdapter
-     * @param thingsAdapter
-     * @param dashboardAdapter
-     */
-    private void clearDataExceedingLimit(boolean demoMode, UserAdapterIface userAdapter, ThingsDataIface thingsAdapter, ActuatorDataIface actuatorAdapter) {
-        try {
-            Map users = userAdapter.getAll();
-            List<Device> devices;
-            Iterator it = users.keySet().iterator();
-            String uid;
-            long limit = 1008;
-
-            long limitFree = (int) getPlatformConfig().get("freeCollectionLimit");
-            long limitExtended = (int) getPlatformConfig().get("extendedCollectionLimit");
-            long limitStandard = (int) getPlatformConfig().get("standardCollectionLimit");
-            long limitPrimary = (int) getPlatformConfig().get("primaryCollectionLimit");
-            long limitSuperuser = (int) getPlatformConfig().get("superCollectionLimit");
-
-            while (it.hasNext()) {
-                uid = (String) it.next();
-                if (!demoMode) {
-                    switch (userAdapter.get(uid).getType()) {
-                        case User.OWNER:
-                        case User.PRIMARY:
-                            limit = limitPrimary;
-                            break;
-                        case User.USER:
-                            limit = limitStandard;
-                            break;
-                        case User.EXTENDED:
-                            limit = limitExtended;
-                            break;
-                        case User.SUPERUSER:
-                            limit = limitSuperuser;
-                            break;
-                        default:
-                            limit = limitFree;
-                    }
-                }
-                thingsAdapter.removeUserAlertsLimit(uid, limit);
-                devices = thingsAdapter.getUserDevices(uid, false);
-                for (int j = 0; j < devices.size(); j++) {
-                    thingsAdapter.clearAllChannelsLimit(devices.get(j).getEUI(), limit);
-                    try {
-                        actuatorAdapter.clearAllCommandsLimit(devices.get(j).getEUI(), limit);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (ClassCastException | UserException | ThingsDataException ex) {
-            logger.error(ex.getMessage());
-            ex.printStackTrace();
-        }
     }
 
     public String createEui(String prefix) {

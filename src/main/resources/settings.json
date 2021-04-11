@@ -5,31 +5,87 @@
         {
             "@type": "org.cricketmsf.config.Configuration",
             "id": "SignomixIntegration",
-            "service": "com.signomix.IntegrationService",
+            "service": "com.signomix.IotService",
             "properties": {
                 "port": "8080",
                 "time-zone": "GMT"
             },
             "ports": [
                 {
-                    "name": "IotAPI",
-                    "interfaceName": "HttpPortedAdapterIface",
-                    "className": "com.signomix.in.IotApi",
+                    "name": "OpenApi",
+                    "interfaceName": "OpenApiIface",
+                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
+                    "description": "",
                     "properties": {
-                        "context": "/api/i4t",
-                        "authorization-required": "true",
-                        "silent-mode": "false",
-                        "dump-request": "true"
+                        "context": "/api"
                     }
                 },
                 {
-                    "name": "DataIntegrationApi",
-                    "interfaceName": "HttpPortedAdapterIface",
-                    "className": "com.signomix.in.IotApi",
+                    "name": "DeviceService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "com.signomix.in.http.ThingsApi",
                     "properties": {
-                        "context": "/api/integration",
-                        "silent-mode": "false",
-                        "dump-request": "true"
+                        "context": "/api/iot/device",
+                        "silent-mode": "false"
+                    }
+                },
+                {
+                    "name": "GroupService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "com.signomix.in.http.ThingsApi",
+                    "properties": {
+                        "context": "/api/iot/group",
+                        "silent-mode": "false"
+                    }
+                },
+                {
+                    "name": "TemplateService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "com.signomix.in.http.ThingsApi",
+                    "properties": {
+                        "context": "/api/iot/template",
+                        "silent-mode": "false"
+                    }
+                },
+                {
+                    "name": "DashboardService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "com.signomix.in.http.DashboardApi",
+                    "properties": {
+                        "context": "/api/dashboard",
+                        "silent-mode": "false"
+                    }
+                },
+                {
+                    "name": "AlertService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "com.signomix.in.http.AlertApi2",
+                    "properties": {
+                        "context": "/api/alert",
+                        "silent-mode": "false"
+                    }
+                },
+                {
+                    "name": "SystemService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "com.signomix.in.http.SystemApi",
+                    "properties": {
+                        "context": "/api/system",
+                        "silent-mode": "false"
+                    }
+                },
+                {
+                    "name": "iotDB",
+                    "interfaceName": "IotDatabaseIface",
+                    "classFullName": "com.signomix.out.db.H2RemoteIotDB",
+                    "properties": {
+                        "host": "dbserver",
+                        "dbfile": "/h2data/iot",
+                        "test-query": "select * from serviceversion",
+                        "version": "9",
+                        "user": "sa",
+                        "password": "",
+                        "time-offset": "3600"
                     }
                 },
                 {
@@ -67,84 +123,21 @@
                     }
                 },
                 {
-                    "name": "UserAdapter",
-                    "interfaceName": "UserAdapterIface",
-                    "className": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
+                    "name": "dashboardAdapter",
+                    "interfaceName": "DashboardIface",
+                    "classFullName": "com.signomix.out.gui.DashboardEmbededAdapter",
                     "properties": {
-                        "helper-name": "UserDB"
+                        "helper-name": "iotDB",
+                        "helper-name2": "userAdapter"
                     }
                 },
                 {
-                    "name": "ScriptingAdapter",
-                    "interfaceName": "ScriptingAdapterIface",
-                    "className": "com.signomix.out.script.NashornScriptingAdapter",
+                    "name": "Scheduler",
+                    "interfaceName": "SchedulerIface",
+                    "className": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "script-file": "./config/device-script-template.js",
-                        "decoder-envelope-location": "./config/payload-decoder-envelope.js",
-                        "helper-name": "IotAdapter"
-                    }
-                },
-                {
-                    "name": "ActuatorService",
-                    "interfaceName": "HttpAdapterIface",
-                    "className": "com.signomix.in.ActuatorApi",
-                    "properties": {
-                        "context": "/api/actuator",
-                        "dump-request": "true",
-                        "silent-mode": "false"
-                    }
-                },
-                {
-                    "name": "Database",
-                    "interfaceName": "KeyValueDBIface",
-                    "className": "org.cricketmsf.out.db.KeyValueDB",
-                    "properties": {
-                        "path": "./data",
-                        "name": "local"
-                    }
-                },
-                {
-                    "name": "IotDB",
-                    "interfaceName": "IotDatabaseIface",
-                    "className": "com.signomix.out.db.H2RemoteIotDB",
-                    "properties": {
-                        "host": "dbserver",
-                        "dbfile": "/h2data/iot",
-                        "file": "iot",
-                        "test-query": "select * from serviceversion",
-                        "version": "1",
-                        "user": "sa",
-                        "password": "",
-                        "time-offset": "3600"
-                    }
-                },
-                {
-                    "name": "IotDataDB",
-                    "interfaceName": "IotDataStorageIface",
-                    "className": "com.signomix.out.db.H2RemoteDataStorageDB",
-                    "properties": {
-                        "host": "dbserver",
-                        "dbfile": "/h2data/data",
-                        "file": "data",
-                        "test-query": "select * from serviceversion",
-                        "version": "1",
-                        "user": "sa",
-                        "password": "",
-                        "requestLimit": "250"
-                    }
-                },
-                {
-                    "name": "ActuatorCommandsDB",
-                    "interfaceName": "ActuatorCommandsDBIface",
-                    "className": "com.signomix.out.db.H2RemoteCommandsDB",
-                    "properties": {
-                        "host": "dbserver",
-                        "dbfile": "/h2data/actuator",
-                        "test-query": "select * from serviceversion",
-                        "version": "1",
-                        "name": "auth",
-                        "user": "sa",
-                        "password": ""
+                        "file": "./data/scheduler",
+                        "init": "1000,*10m,_;1001,*1h,_"
                     }
                 }
             ]
